@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backlog 4 Keys Metrics</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Backlog 4 Keys Metrics</h1>
+        <p>DevOps performance metrics calculator for Backlog projects</p>
+    </div>
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Step 1 Summary -->
+                <div class="step active" id="sidebar-step-1" onclick="goToStep(1)">
+                    <h3><span class="step-number">1</span>Backlog接続</h3>
+                    <div id="connectionStatus">未接続</div>
+                </div>
+
+                <!-- Step 2 Summary -->
+                <div class="step disabled" id="sidebar-step-2" onclick="goToStep(2)">
+                    <h3><span class="step-number">2</span>プロジェクト選択</h3>
+                    <div id="selectedProjectDisplay">未選択</div>
+                </div>
+
+                <!-- Step 3 Summary -->
+                <div class="step disabled" id="sidebar-step-3" onclick="goToStep(3)">
+                    <h3><span class="step-number">3</span>メトリクス設定</h3>
+                    <div id="configStatus">未設定</div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Step 1: Backlog Connection -->
+                <div class="step" id="step-1">
+                    <h2><span class="step-number">1</span>Backlog接続</h2>
+                    <p>BacklogのSpace KeyとAPI Keyを入力してください。</p>
+                    
+                    <div class="form-group">
+                        <label for="spaceKey">Space Key</label>
+                        <input type="text" id="spaceKey" placeholder="例: mycompany">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" placeholder="Backlog API Key">
+                    </div>
+                    
+                    <button class="button" onclick="connectToBacklog()">接続</button>
+                    
+                    <div id="connectionResult"></div>
+                </div>
+
+                <!-- Step 2: Project Selection -->
+                <div class="step hidden" id="step-2">
+                    <h2><span class="step-number">2</span>プロジェクト選択</h2>
+                    <p>メトリクスを計算したいプロジェクトを選択してください。</p>
+                    
+                    <div id="projectsList" class="projects-grid"></div>
+                    
+                    <button class="button hidden" id="selectProjectBtn" onclick="selectProject()">このプロジェクトを選択</button>
+                </div>
+
+                <!-- Step 3: Configuration -->
+                <div class="step hidden" id="step-3">
+                    <h2><span class="step-number">3</span>メトリクス設定</h2>
+                    <p>4 Keysメトリクス計算用の設定を行います。</p>
+                    
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="sinceDate">開始日</label>
+                            <input type="date" id="sinceDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="untilDate">終了日</label>
+                            <input type="date" id="untilDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>完了ステータス（Deployment Frequency用）</label>
+                        <div id="statusesList" class="checkbox-group"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>変更チケット設定（Lead Time & Change Failure Rate用）</label>
+                        <div class="radio-group">
+                            <div class="radio-button">
+                                <input type="radio" id="changeByType" name="changeBy" value="type" onchange="toggleChangeSettings()">
+                                <label for="changeByType">チケットタイプで指定</label>
+                            </div>
+                            <div class="radio-button">
+                                <input type="radio" id="changeByCategory" name="changeBy" value="category" onchange="toggleChangeSettings()">
+                                <label for="changeByCategory">カテゴリで指定</label>
+                            </div>
+                        </div>
+                        <div id="changeSelectionLabel" class="hidden" style="margin-bottom: 0.5rem; font-weight: 600; color: #374151;"></div>
+                        <div id="changeTypesList" class="checkbox-group hidden"></div>
+                        <div id="changeCategoriesList" class="checkbox-group hidden"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>バグチケット設定（MTTR & Change Failure Rate用）</label>
+                        <div class="radio-group">
+                            <div class="radio-button">
+                                <input type="radio" id="bugByType" name="bugBy" value="type" onchange="toggleBugSettings()">
+                                <label for="bugByType">チケットタイプで指定</label>
+                            </div>
+                            <div class="radio-button">
+                                <input type="radio" id="bugByCategory" name="bugBy" value="category" onchange="toggleBugSettings()">
+                                <label for="bugByCategory">カテゴリで指定</label>
+                            </div>
+                        </div>
+                        <div id="bugSelectionLabel" class="hidden" style="margin-bottom: 0.5rem; font-weight: 600; color: #374151;"></div>
+                        <div id="bugTypesList" class="checkbox-group hidden"></div>
+                        <div id="bugCategoriesList" class="checkbox-group hidden"></div>
+                    </div>
+                    
+                    <button class="button" onclick="calculateMetrics()">メトリクス計算</button>
+                </div>
+
+                <!-- Step 4: Results -->
+                <div class="step hidden" id="step-4">
+                    <h2><span class="step-number">4</span>4 Keys メトリクス結果</h2>
+                    <p>計算されたDevOps 4 Keysメトリクスです。</p>
+                    
+                    <div id="metricsResult" class="metrics-grid"></div>
+                    
+                    <button class="button-secondary" onclick="resetForm()">最初から実行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
